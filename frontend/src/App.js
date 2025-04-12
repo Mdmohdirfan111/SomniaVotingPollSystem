@@ -4,8 +4,7 @@ import './App.css';
 
 function App() {
   const [walletConnected, setWalletConnected] = useState(false);
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
+  const [walletAddress, setWalletAddress] = useState('');
 
   const connectWallet = async () => {
     if (window.ethereum) {
@@ -13,16 +12,18 @@ function App() {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
-        setProvider(provider);
-        setSigner(signer);
+        const address = await signer.getAddress();
+        
+        setWalletAddress(`${address.slice(0, 6)}...${address.slice(-4)}`);
         setWalletConnected(true);
+
         // Switch to Somnia Testnet
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0xc4d8' }], // Chain ID 50312 in hex
+          params: [{ chainId: '0xc4d8' }], // 50312 in hex
         });
       } catch (error) {
-        console.error("Wallet connection failed:", error);
+        console.error("Error:", error);
       }
     } else {
       alert("Please install MetaMask!");
@@ -31,12 +32,25 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Somnia Voting System</h1>
-      {!walletConnected ? (
-        <button onClick={connectWallet}>Connect Wallet</button>
-      ) : (
-        <p>Wallet Connected!</p>
-      )}
+      <header>
+        <h1>Somnia Voting DApp</h1>
+        {!walletConnected ? (
+          <button className="wallet-btn" onClick={connectWallet}>
+            Connect Wallet
+          </button>
+        ) : (
+          <div className="wallet-connected">
+            Connected: {walletAddress}
+          </div>
+        )}
+      </header>
+
+      <main>
+        {/* Polls/Voting Section - Next Step Mein Add Karenge */}
+        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+          <p>Ready to create and vote on polls!</p>
+        </div>
+      </main>
     </div>
   );
 }
